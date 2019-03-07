@@ -33,12 +33,7 @@ public class DialogFragMarker extends AppCompatDialogFragment {
                 .setPositiveButton("Agregar", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if(et_nombre_marcador.getText().toString().length()>0 && !et_nombre_marcador.getText().toString().equals("")){
-                            Toast.makeText(getActivity(), "El nombre del marcador no debe ser nulo", Toast.LENGTH_SHORT).show();
-                        } else {
-                            String nombre_marcador = et_nombre_marcador.getText().toString();
-                            listener.obtenerNombreMarcador(nombre_marcador);
-                        }
+                        listener.agregarMarcador(et_nombre_marcador.getText().toString());
                     }
                 });
 
@@ -47,8 +42,19 @@ public class DialogFragMarker extends AppCompatDialogFragment {
         return builder.create();
     }
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        try {
+            listener = (DialogFragMarkerActions) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()+" DialogFragMarkerActions");
+        }
+    }
+
     public interface DialogFragMarkerActions{
-        void obtenerNombreMarcador(String nombreMarcador);
+        void agregarMarcador(String nombreMarcador);
     }
 
 

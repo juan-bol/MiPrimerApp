@@ -39,8 +39,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private List<Marker> markers;
     private FloatingActionButton fab_limpiar;
 
-    private DialogFragMarker dialogFragMarker;
-    private String nombreMarcador;
+    private LatLng latLngMarcador;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,8 +49,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        dialogFragMarker = new DialogFragMarker();
 
         manager = (LocationManager) getSystemService(LOCATION_SERVICE);
         markers = new ArrayList<Marker>();
@@ -89,8 +86,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onMapClick(LatLng latLng) {
                 openDialogMarker();
-                mMap.addMarker(new MarkerOptions().position(latLng).title(nombreMarcador));
-                mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+                latLngMarcador = latLng;
             }
         });
 
@@ -109,8 +105,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         else {
             //Agregar el listener de ubicacion
-            if(manager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-                manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, new LocationListener() {
+            if(manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
+                manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, new LocationListener() {
                     @Override
                     public void onLocationChanged(Location location) {
                         String msj = "LAT: "+location.getLatitude()+ " , LONG: "+location.getLongitude();
@@ -121,8 +117,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         LatLng myPosition = new LatLng(location.getLatitude(), location.getLongitude());
                         me = mMap.addMarker(new MarkerOptions().position(myPosition)
                                 .title("Me").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)));
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPosition, 10));
-
                     }
 
                     @Override
@@ -141,19 +135,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
                 });
             }
-            else if(manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
-                manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, new LocationListener() {
+            else if(manager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+                manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, new LocationListener() {
                     @Override
                     public void onLocationChanged(Location location) {
+                        String msj = "LAT: "+location.getLatitude()+ " , LONG: "+location.getLongitude();
                         Log.e(">>>","LAT: "+location.getLatitude()+ " , LONG: "+location.getLongitude());
+                        Toast.makeText(MapsActivity.this, msj, Toast.LENGTH_LONG).show();
 
-                        if(me != null){
-                            me.remove();
-                        }
-                        me = mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude()))
+                        if(me != null) me.remove();
+                        LatLng myPosition = new LatLng(location.getLatitude(), location.getLongitude());
+                        me = mMap.addMarker(new MarkerOptions().position(myPosition)
                                 .title("Me").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)));
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 10));
-
                     }
 
                     @Override
@@ -178,7 +171,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void openDialogMarker(){
         DialogFragMarker dialogo = new DialogFragMarker();
-        dialogo.show(getSupportFragmentManager(),"Dialogo MarcadorZ");
+        dialogo.show(getSupportFragmentManager(),"Dialogo Marcador");
+    }
+
+    @Override
+    public void agregarMarcador(String nombreMarcador){
+        if(nombreMarcador==null || nombreMarcador.equals("")){
+            Toast.makeText(MapsActivity.this, "El nombre del marcador no debe ser nulo", Toast.LENGTH_SHORT).show();
+        }
+        else {
+            mMap.addMarker(new MarkerOptions().position(latLngMarcador).title(nombreMarcador));
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(latLngMarcador));
+            //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPosition, 10));
+        }
     }
 
 
@@ -187,9 +192,5 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    @Override
-    public void obtenerNombreMarcador(String nombreMarcador) {
-        nombreMarcador = nombreMarcador;
-    }
 }
 
