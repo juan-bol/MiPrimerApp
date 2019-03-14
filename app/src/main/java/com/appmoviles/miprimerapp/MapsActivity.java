@@ -67,10 +67,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onClick(View v) {
                 for (Marker marker : markers) {
                     marker.remove();
-                    calcularDistancias();
-
                 }
+                markers.clear();
                 Toast.makeText(MapsActivity.this, "Se limpiaron todos los marcadores de lugares", Toast.LENGTH_LONG).show();
+                calcularDistancias();
             }
         });
 
@@ -240,17 +240,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         for (Marker marker: markers){
             if (marker!=me){
                 LatLng markerLatLng = marker.getPosition();
-                Location markerLocation = new Location(LocationManager.GPS_PROVIDER);
+                Location markerLocation = new Location(LocationManager.NETWORK_PROVIDER);
                 markerLocation.setLatitude(markerLatLng.latitude);
                 markerLocation.setLongitude(markerLatLng.longitude);
                 LatLng myLatLng = me.getPosition();
-                Location myLocation = new Location(LocationManager.GPS_PROVIDER);
-                myLocation.setLatitude(myLocation.getLatitude());
-                myLocation.setLongitude(myLocation.getLongitude());
+                Location myLocation = new Location(LocationManager.NETWORK_PROVIDER);
+                myLocation.setLatitude(myLatLng.latitude);
+                myLocation.setLongitude(myLatLng.longitude);
 
                 float distance = myLocation.distanceTo(markerLocation)/1000;
                 marker.setSnippet("Usted se encuentra a "+distance+" Kms");
-                if(menor==-1 || menor<distance) {
+                if(menor==-1 || distance<menor) {
                     menor = distance;
                     masCercano = marker;
                 }
@@ -268,6 +268,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mensaje = "El lugar más cercano es "+masCercano.getTitle();
             }
         }
+        tv_box.setText(mensaje);
     }
 }
 
